@@ -14,6 +14,8 @@ Plug 'junegunn/vim-easy-align'
 Plug 'crusoexia/vim-javascript-lib'
 
 " Any valid git URL is allowed
+Plug 'https://github.com/morhetz/gruvbox'
+Plug 'https://github.com/tomasr/molokai'
 Plug 'https://github.com/junegunn/vim-github-dashboard.git'
 Plug 'https://github.com/pangloss/vim-javascript'
 Plug 'https://github.com/jelera/vim-javascript-syntax'
@@ -89,15 +91,17 @@ set softtabstop=2
 " User spaces instead of tabs
 set expandtab
 set showtabline=2
+"set termguicolor
 
 " ========================================================================================
 " Some general settings.
 " ========================================================================================
 syntax enable
 set t_Co=256
-colorscheme molokai
+"colorscheme molokai
 " colorscheme onehalfdark
-let g:molokai_original = 1
+colorscheme gruvbox
+"let g:molokai_original = 1
 let g:rehash256 = 1
 
 " Make backspace / delete work
@@ -108,11 +112,19 @@ set number
 
 " Set ligatures with Fira Code (ie fancy triple equal instead of ===)
 " the silent! is to ignore errors
-silent! set macligatures
+"silent! set macligatures
 
-set guifont=Fira\ Code:h14
+"set guifont=Fira\ Code:h14
 set encoding=utf-8
-
+highlight htmlArg gui=italic
+highlight Comment gui=italic
+highlight Type    gui=italic
+" set htmlArgs in jsx to italic and reset their color to gruvbox aqua
+hi xmlAttrib cterm=italic ctermfg=14
+hi htmlArg cterm=italic
+hi Comment cterm=italic
+hi Type    cterm=italic
+"hi jsArrowFunction font='Fira\ Code'
 " Proper syntax highlighting for javascript
 let g:jsx_ext_required = 0
 
@@ -240,8 +252,9 @@ let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
-let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_mode_map = { 'mode': 'active', 'passive_filetypes': ['go'] }
+let g:syntastic_javascript_checkers = ['eslint']
+"let g:syntastic_javascript_eslint_exe='$(npm bin)/eslint'
 " ======================================
 " Ack Searching and cope displaying
 " ======================================
@@ -367,3 +380,10 @@ let g:devicons_colors = {
   \'green': ['', '', '', '']
 \}
 call DeviconsColors(g:devicons_colors)
+
+function! SynStack()
+    if !exists("*synstack")
+        return
+    endif
+    echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+endfunc
