@@ -40,11 +40,20 @@ Plug 'https://github.com/nsf/gocode'
 Plug 'https://github.com/ervandew/supertab'
 Plug 'https://github.com/vim-syntastic/syntastic'
 Plug 'https://github.com/sonph/onehalf'
-Plug 'https://github.com/ryanoasis/vim-devicons'
+"Plug 'https://github.com/ryanoasis/vim-devicons'
 Plug 'https://github.com/suan/vim-instant-markdown'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
+Plug 'https://github.com/ElmCast/elm-vim'
+"Plug 'https://github.com/w0rp/ale'
 "
 " Multiple Plug commands can be written in a single line using | separators
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+Plug 'hzchirs/vim-material'
+Plug 'https://github.com/NewProggie/NewProggie-Color-Scheme'
+Plug 'https://github.com/roosta/vim-srcery'
+Plug 'https://github.com/Marfisc/vorange'
+Plug 'https://github.com/jacoborus/tender.vim'
+Plug 'https://github.com/chriskempson/base16-vim'
 "Plug 'bagrat/vim-workspace'
 
 " On-demand loading
@@ -97,10 +106,18 @@ set showtabline=2
 " Some general settings.
 " ========================================================================================
 syntax enable
-set t_Co=256
+let base16colorspace=256  " Access colors present in 256 colorspace
+"set t_Co=256
 "colorscheme molokai
 " colorscheme onehalfdark
-colorscheme gruvbox
+"colorscheme gruvbox
+"colorscheme vim-material
+"colorscheme newproggie
+"colorscheme srcery
+"colorscheme vorange
+"colorscheme tender
+colorscheme base16-default-dark
+
 "let g:molokai_original = 1
 let g:rehash256 = 1
 
@@ -120,7 +137,8 @@ highlight htmlArg gui=italic
 highlight Comment gui=italic
 highlight Type    gui=italic
 " set htmlArgs in jsx to italic and reset their color to gruvbox aqua
-hi xmlAttrib cterm=italic ctermfg=14
+"hi xmlAttrib cterm=italic ctermfg=14
+hi xmlAttrib cterm=italic 
 hi htmlArg cterm=italic
 hi Comment cterm=italic
 hi Type    cterm=italic
@@ -162,6 +180,14 @@ let g:airline_theme='molokai'
 let g:airline_powerline_fonts = 1
 "let g:webdevicons_enable_airline_tabline = 1
 let g:webdevicons_enable_airline_statusline = 1
+
+" ===============================================================
+" Prettier configuration
+" ===============================================================
+"let g:prettier#autoformat = 0
+"autocmd BufWritePre *.js,*.json,*.css,*.scss,*.less,*.graphql Prettier
+"let g:prettier#config#bracket_spacing = 'true'
+"let g:prettier#config#esproposal_decorators = 'true'
 
 
 " Properly disable sound on errors on MacVim
@@ -255,6 +281,7 @@ let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
 let g:syntastic_mode_map = { 'mode': 'active', 'passive_filetypes': ['go'] }
 let g:syntastic_javascript_checkers = ['eslint']
 "let g:syntastic_javascript_eslint_exe='$(npm bin)/eslint'
+"let g:ale_linters = {'javascript': ['eslint']}
 " ======================================
 " Ack Searching and cope displaying
 " ======================================
@@ -387,3 +414,8 @@ function! SynStack()
     endif
     echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunc
+
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
