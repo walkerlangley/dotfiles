@@ -1,5 +1,3 @@
-
-
 " =========================================================================================
 " Plugin Management using vim-plug
 " ========================================================================================
@@ -107,7 +105,7 @@ set showtabline=2
 " ========================================================================================
 syntax enable
 let base16colorspace=256  " Access colors present in 256 colorspace
-"set t_Co=256
+
 "colorscheme molokai
 " colorscheme onehalfdark
 "colorscheme gruvbox
@@ -137,8 +135,8 @@ highlight htmlArg gui=italic
 highlight Comment gui=italic
 highlight Type    gui=italic
 " set htmlArgs in jsx to italic and reset their color to gruvbox aqua
-"hi xmlAttrib cterm=italic ctermfg=14
-hi xmlAttrib cterm=italic 
+hi xmlAttrib cterm=italic ctermfg=14
+"hi xmlAttrib cterm=italic
 hi htmlArg cterm=italic
 hi Comment cterm=italic
 hi Type    cterm=italic
@@ -415,7 +413,9 @@ function! SynStack()
     echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunc
 
-if filereadable(expand("~/.vimrc_background"))
-  let base16colorspace=256
-  source ~/.vimrc_background
-endif
+" Set this if you want the awesome base16 colorscheme, but no italic with
+" operator mono
+"if filereadable(expand("~/.vimrc_background"))
+  "let base16colorspace=256
+  "source ~/.vimrc_background
+"endif
