@@ -38,6 +38,7 @@ Plug 'https://github.com/nsf/gocode'
 Plug 'https://github.com/ervandew/supertab'
 Plug 'https://github.com/vim-syntastic/syntastic'
 Plug 'https://github.com/sonph/onehalf'
+Plug 'https://github.com/godlygeek/tabular'
 "Plug 'https://github.com/ryanoasis/vim-devicons'
 Plug 'https://github.com/suan/vim-instant-markdown'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
@@ -70,7 +71,7 @@ Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
 Plug 'sonph/onehalf', {'rtp': 'vim/'}
 
 " Plugin outside ~/.vim/plugged with post-update hook
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
 " Unmanaged plugin (manually installed and updated)
 " Plug '~/my-prototype-plugin'
@@ -98,23 +99,28 @@ set softtabstop=2
 " User spaces instead of tabs
 set expandtab
 set showtabline=2
-"set termguicolor
+"set termguicolors
+"set t_Co=256
 
 " ========================================================================================
 " Some general settings.
 " ========================================================================================
 syntax enable
-let base16colorspace=256  " Access colors present in 256 colorspace
 
+" Access colors present in 256 colorspace
+let base16colorspace=256
+
+" A whole bunch of different color themes
+colorscheme base16-default-dark
 "colorscheme molokai
-" colorscheme onehalfdark
+"colorscheme onehalfdark
 "colorscheme gruvbox
 "colorscheme vim-material
 "colorscheme newproggie
 "colorscheme srcery
 "colorscheme vorange
 "colorscheme tender
-colorscheme base16-default-dark
+"colorscheme nightman
 
 "let g:molokai_original = 1
 let g:rehash256 = 1
@@ -123,7 +129,15 @@ let g:rehash256 = 1
 set backspace=indent,eol,start
 
 " Set line numbers
-set number
+set number relativenumber
+
+" This is to automatically toggle relative numbers based on
+" BufEnter,FocusGained,InsertLeave etc....
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter * set norelativenumber
+augroup END
 
 " Set ligatures with Fira Code (ie fancy triple equal instead of ===)
 " the silent! is to ignore errors
@@ -131,12 +145,9 @@ set number
 
 "set guifont=Fira\ Code:h14
 set encoding=utf-8
-highlight htmlArg gui=italic
-highlight Comment gui=italic
-highlight Type    gui=italic
+
 " set htmlArgs in jsx to italic and reset their color to gruvbox aqua
 hi xmlAttrib cterm=italic ctermfg=14
-"hi xmlAttrib cterm=italic
 hi htmlArg cterm=italic
 hi Comment cterm=italic
 hi Type    cterm=italic
@@ -194,17 +205,31 @@ if has("gui_macvim")
 endif
 
 " ===============================================================
-" Change the leader key
+" Change the leader key and set up mappings
 " ===============================================================
- let mapleader = "\<Space>"
+let mapleader="\<Space>"
 
-" ===============================================================
-" Autocomplete with Neocomplete
-" ===============================================================
- let g:neocomplete#enable_at_startup = 1
+
 " ===============================================================
 " Some custom keybindings
 " ===============================================================
+"
+" Tabularize Stuff
+if exists(":Tabularize")
+  nmap <Leader>a= :Tabularize /=<CR>
+  vmap <Leader>a= :Tabularize /=<CR>
+  nmap <Leader>a: :Tabularize /:\zs<CR>
+  vmap <Leader>a: :Tabularize /:\zs<CR>
+endif
+
+" Fugitive Mappings (Git stuff)
+nmap <Leader>gs :Gstatus<CR>
+nmap <Leader>gd :Gdiff<CR>
+nmap <Leader>gc :Gcommit<CR>
+nmap <Leader>gb :Gblame<CR>
+nmap <Leader>gl :Glog<CR>
+nmap <Leader>gpu :Gpush<CR>
+nmap <Leader>gpl :Gpull<CR>
 
 " Fast Saving
 nmap <leader>w :w!<CR>
@@ -271,6 +296,10 @@ let g:go_fmt_command = "goimports"
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
+" ===============================================================
+" Autocomplete with Neocomplete
+" ===============================================================
+ let g:neocomplete#enable_at_startup = 1
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
@@ -280,6 +309,9 @@ let g:syntastic_mode_map = { 'mode': 'active', 'passive_filetypes': ['go'] }
 let g:syntastic_javascript_checkers = ['eslint']
 "let g:syntastic_javascript_eslint_exe='$(npm bin)/eslint'
 "let g:ale_linters = {'javascript': ['eslint']}
+
+
+let g:ctrlp_custom_ignore = '(node_modules | vendor)'
 " ======================================
 " Ack Searching and cope displaying
 " ======================================
@@ -310,16 +342,16 @@ filetype plugin on
 " ========================================================================================
 
 " Change color scheme when entering and exiting Goyo
-function! s:goyo_enter()
-	colorscheme pencil
-endfunction
+"function! s:goyo_enter()
+  "colorscheme pencil
+"endfunction
 
-function! s:goyo_leave()
-        colorscheme molokai
-endfunction
+"function! s:goyo_leave()
+  "colorscheme base16-default-dark
+"endfunction
 
-autocmd! User GoyoEnter nested call <SID>goyo_enter()
-autocmd! User GoyoLeave nested call <SID>goyo_leave()
+"autocmd! User GoyoEnter nested call <SID>goyo_enter()
+"autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
 " Map ctrl + m to launch markdown preview
 let vim_markdown_preview_hotkey='<S-p>'
@@ -330,81 +362,83 @@ autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 " Close vim if the only window left open is NerdTree
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
-let g:sol = {
-  \"gui": {
-    \"base03": "#002b36",
-    \"base02": "#073642",
-    \"base01": "#586e75",
-    \"base00": "#657b83",
-    \"base0": "#839496",
-    \"base1": "#93a1a1",
-    \"base2": "#eee8d5",
-    \"base3": "#fdf6e3",
-    \"yellow": "#b58900",
-    \"orange": "#cb4b16",
-    \"red": "#dc322f",
-    \"magenta": "#d33682",
-    \"violet": "#6c71c4",
-    \"blue": "#268bd2",
-    \"cyan": "#2aa198",
-    \"green": "#719e07"
-  \},
-  \"cterm": {
-    \"base03": 8,
-    \"base02": 0,
-    \"base01": 10,
-    \"base00": 11,
-    \"base0": 12,
-    \"base1": 14,
-    \"base2": 7,
-    \"base3": 15,
-    \"yellow": 3,
-    \"orange": 9,
-    \"red": 1,
-    \"magenta": 5,
-    \"violet": 13,
-    \"blue": 4,
-    \"cyan": 6,
-    \"green": 2
-  \}
-\}
-function! DeviconsColors(config)
-  let colors = keys(a:config)
-  augroup devicons_colors
-    autocmd!
-    for color in colors
-      if color == 'normal'
-        exec 'autocmd FileType nerdtree,startify if &background == ''dark'' | '.
-          \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base01.' ctermfg='.g:sol.cterm.base01.' | '.
-          \ 'else | '.
-          \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base1.' ctermfg='.g:sol.cterm.base1.' | '.
-          \ 'endif'
-      elseif color == 'emphasize'
-        exec 'autocmd FileType nerdtree,startify if &background == ''dark'' | '.
-          \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base1.' ctermfg='.g:sol.cterm.base1.' | '.
-          \ 'else | '.
-          \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base01.' ctermfg='.g:sol.cterm.base01.' | '.
-          \ 'endif'
-      else
-        exec 'autocmd FileType nerdtree,startify highlight devicons_'.color.' guifg='.g:sol.gui[color].' ctermfg='.g:sol.cterm[color]
-      endif
-      exec 'autocmd FileType nerdtree,startify syntax match devicons_'.color.' /\v'.join(a:config[color], '|').'/ containedin=ALL'
-    endfor
-  augroup END
-endfunction
-let g:devicons_colors = {
-  \'normal': ['', '', '', '', ''],
-  \'emphasize': ['', '', '', '', '', '', '', '', '', '', ''],
-  \'yellow': ['', '', ''],
-  \'orange': ['', '', '', 'λ', '', ''],
-  \'red': ['', '', '', '', '', '', '', '', ''],
-  \'magenta': [''],
-  \'violet': ['', '', '', ''],
-  \'blue': ['', '', '', '', '', '', '', '', '', '', '', '', ''],
-  \'cyan': ['', '', '', ''],
-  \'green': ['', '', '', '']
-\}
-call DeviconsColors(g:devicons_colors)
+" This is for devicons, but they dont' work with operator mono, so I'm
+" commenting out for now
+" let g:sol = {
+"   \"gui": {
+"     \"base03": "#002b36",
+"     \"base02": "#073642",
+"     \"base01": "#586e75",
+"     \"base00": "#657b83",
+"     \"base0": "#839496",
+"     \"base1": "#93a1a1",
+"     \"base2": "#eee8d5",
+"     \"base3": "#fdf6e3",
+"     \"yellow": "#b58900",
+"     \"orange": "#cb4b16",
+"     \"red": "#dc322f",
+"     \"magenta": "#d33682",
+"     \"violet": "#6c71c4",
+"     \"blue": "#268bd2",
+"     \"cyan": "#2aa198",
+"     \"green": "#719e07"
+"   \},
+"   \"cterm": {
+"     \"base03": 8,
+"     \"base02": 0,
+"     \"base01": 10,
+"     \"base00": 11,
+"     \"base0": 12,
+"     \"base1": 14,
+"     \"base2": 7,
+"     \"base3": 15,
+"     \"yellow": 3,
+"     \"orange": 9,
+"     \"red": 1,
+"     \"magenta": 5,
+"     \"violet": 13,
+"     \"blue": 4,
+"     \"cyan": 6,
+"     \"green": 2
+"   \}
+" \}
+" function! DeviconsColors(config)
+"   let colors = keys(a:config)
+"   augroup devicons_colors
+"     autocmd!
+"     for color in colors
+"       if color == 'normal'
+"         exec 'autocmd FileType nerdtree,startify if &background == ''dark'' | '.
+"           \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base01.' ctermfg='.g:sol.cterm.base01.' | '.
+"           \ 'else | '.
+"           \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base1.' ctermfg='.g:sol.cterm.base1.' | '.
+"           \ 'endif'
+"       elseif color == 'emphasize'
+"         exec 'autocmd FileType nerdtree,startify if &background == ''dark'' | '.
+"           \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base1.' ctermfg='.g:sol.cterm.base1.' | '.
+"           \ 'else | '.
+"           \ 'highlight devicons_'.color.' guifg='.g:sol.gui.base01.' ctermfg='.g:sol.cterm.base01.' | '.
+"           \ 'endif'
+"       else
+"         exec 'autocmd FileType nerdtree,startify highlight devicons_'.color.' guifg='.g:sol.gui[color].' ctermfg='.g:sol.cterm[color]
+"       endif
+"       exec 'autocmd FileType nerdtree,startify syntax match devicons_'.color.' /\v'.join(a:config[color], '|').'/ containedin=ALL'
+"     endfor
+"   augroup END
+" endfunction
+" let g:devicons_colors = {
+"   \'normal': ['', '', '', '', ''],
+"   \'emphasize': ['', '', '', '', '', '', '', '', '', '', ''],
+"   \'yellow': ['', '', ''],
+"   \'orange': ['', '', '', 'λ', '', ''],
+"   \'red': ['', '', '', '', '', '', '', '', ''],
+"   \'magenta': [''],
+"   \'violet': ['', '', '', ''],
+"   \'blue': ['', '', '', '', '', '', '', '', '', '', '', '', ''],
+"   \'cyan': ['', '', '', ''],
+"   \'green': ['', '', '', '']
+" \}
+" call DeviconsColors(g:devicons_colors)
 
 function! SynStack()
     if !exists("*synstack")
@@ -416,6 +450,6 @@ endfunc
 " Set this if you want the awesome base16 colorscheme, but no italic with
 " operator mono
 "if filereadable(expand("~/.vimrc_background"))
-  "let base16colorspace=256
-  "source ~/.vimrc_background
+"  let base16colorspace=256
+"  source ~/.vimrc_background
 "endif
