@@ -25,7 +25,7 @@ Plug 'https://github.com/scrooloose/nerdtree'
 Plug 'https://github.com/airblade/vim-gitgutter'
 Plug 'https://github.com/ntpeters/vim-better-whitespace'
 Plug 'https://github.com/mileszs/ack.vim'
-Plug 'https://github.com/ctrlpvim/ctrlp.vim'
+"Plug 'https://github.com/ctrlpvim/ctrlp.vim'
 Plug 'https://github.com/Shougo/neocomplete.vim'
 Plug 'https://github.com/scrooloose/nerdcommenter'
 Plug 'https://github.com/chrisbra/Colorizer'
@@ -37,23 +37,27 @@ Plug 'https://github.com/fatih/vim-go'
 Plug 'https://github.com/nsf/gocode'
 Plug 'https://github.com/ervandew/supertab'
 Plug 'https://github.com/vim-syntastic/syntastic'
-Plug 'https://github.com/sonph/onehalf'
+"Plug 'https://github.com/sonph/onehalf'
 Plug 'https://github.com/godlygeek/tabular'
 "Plug 'https://github.com/ryanoasis/vim-devicons'
 Plug 'https://github.com/suan/vim-instant-markdown'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
-Plug 'https://github.com/ElmCast/elm-vim'
+"Plug 'prettier/vim-prettier', { 'do': 'yarn install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
+"Plug 'https://github.com/ElmCast/elm-vim'
 "Plug 'https://github.com/w0rp/ale'
 "
 " Multiple Plug commands can be written in a single line using | separators
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 Plug 'hzchirs/vim-material'
-Plug 'https://github.com/NewProggie/NewProggie-Color-Scheme'
-Plug 'https://github.com/roosta/vim-srcery'
-Plug 'https://github.com/Marfisc/vorange'
+"Plug 'https://github.com/NewProggie/NewProggie-Color-Scheme'
+"Plug 'https://github.com/roosta/vim-srcery'
+"Plug 'https://github.com/Marfisc/vorange'
 Plug 'https://github.com/jacoborus/tender.vim'
 Plug 'https://github.com/chriskempson/base16-vim'
+Plug 'https://github.com/heavenshell/vim-jsdoc'
+"Plug 'https://github.com/leafgarland/typescript-vim'
 "Plug 'bagrat/vim-workspace'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
 
 " On-demand loading
 " Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
@@ -75,6 +79,13 @@ Plug 'sonph/onehalf', {'rtp': 'vim/'}
 
 " Unmanaged plugin (manually installed and updated)
 " Plug '~/my-prototype-plugin'
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
 
 " Initialize plugin system
 call plug#end()
@@ -190,6 +201,9 @@ let g:airline_powerline_fonts = 1
 "let g:webdevicons_enable_airline_tabline = 1
 let g:webdevicons_enable_airline_statusline = 1
 
+" Jsdoc customization
+let g:jsdoc_enable_es6=1
+
 " ===============================================================
 " Prettier configuration
 " ===============================================================
@@ -283,23 +297,42 @@ noremap <leader>y "*y
 " Paste text in from clipboard
 noremap <leader>p "*p
 
-
+" jsdoc mapping
+nnoremap db :JsDoc<CR>
 
 " Show special characters in vim
 set listchars=tab:▸\ ,eol:¬
 set list
 
-
-let g:go_fmt_command = "goimports"
-
 " set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
+" Go Stuff
+let g:go_fmt_command = "goimports"
+let g:go_auto_type_info = 0
+let g:go_updatetime = 500
+
+
 " ===============================================================
 " Autocomplete with Neocomplete
 " ===============================================================
- let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#disable_auto_complete = 1
+
+
+""" Enable tab completion
+inoremap <expr><TAB> pumvisible() ? "\<C-n>" :
+	\ <SID>check_back_space() ? "\<TAB>" :
+	\ neocomplete#start_manual_complete()
+function! s:check_back_space() "{{{
+	let col = col('.') - 1
+	return !col || getline('.')[col - 1] =~ '\s'
+endfunction"}}}
+
+" ===============================================================
+" Syntastic things
+" ===============================================================
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
@@ -321,8 +354,21 @@ if executable('ag')
   let g:ackprg = 'ag --vimgrep --smart-case'
 endif
 
+" ======================================
+" Fzf and Rgrep stuff
+" ======================================
+nmap <C-p> :Files<CR>
+let g:rg_command = '
+  \ rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --color "always"
+  \ -g "*.{js,json,php,md,styl,jade,html,config,py,cpp,c,go,hs,rb,conf}"
+  \ -g "!{.git,node_modules,vendor}/*" '
+
+command! -bang -nargs=* F call fzf#vim#grep(g:rg_command .shellescape(<q-args>), 1, <bang>0)
+
 " When you press `space f`, you'll run :Ack on the word under the cursor
-map <leader>f :Ack<CR>
+map <leader>ff :Ack<CR>
+map <leader>f :Ack<Space>
+
 
 filetype plugin on
 
