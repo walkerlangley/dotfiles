@@ -36,14 +36,14 @@ Plug 'https://github.com/darthmall/vim-vue'
 Plug 'https://github.com/fatih/vim-go'
 Plug 'https://github.com/nsf/gocode'
 Plug 'https://github.com/ervandew/supertab'
-Plug 'https://github.com/vim-syntastic/syntastic'
+"Plug 'https://github.com/vim-syntastic/syntastic'
 "Plug 'https://github.com/sonph/onehalf'
 Plug 'https://github.com/godlygeek/tabular'
 "Plug 'https://github.com/ryanoasis/vim-devicons'
 Plug 'https://github.com/suan/vim-instant-markdown'
 "Plug 'prettier/vim-prettier', { 'do': 'yarn install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
 "Plug 'https://github.com/ElmCast/elm-vim'
-"Plug 'https://github.com/w0rp/ale'
+Plug 'https://github.com/w0rp/ale'
 "
 " Multiple Plug commands can be written in a single line using | separators
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
