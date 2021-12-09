@@ -1,0 +1,265 @@
+# History: don't store duplicates
+# export HISTCONTROL=erasedups
+# History: 10,000 entries
+# export HISTSIZE=10000
+
+
+#---------------------------------------------------
+# Funciont Definitions
+#---------------------------------------------------
+
+# grep for a process
+function psg {
+  FIRST=`echo $1 | sed -e 's/^\(.\).*/\1/'`
+  REST=`echo $1 | sed -e 's/^.\(.*\)/\1/'`
+  ps aux | grep "[$FIRST]$REST"
+}
+
+function gitpromptold () {
+	local gitbranch=$(git branch 2>&1 | grep '\*' | sed -e 's/\* //g')
+  echo $gitbranch
+	if [[ "$gitbranch" != "" ]]; then
+      PS1="${BLUE}\h${WHITE} [\u] ${LIGHT_GRAY}\w${YELLOW} (${gitbranch}) ${LIGHT_GRAY}: "
+    else
+      PS1="${BLUE}\h${WHITE} [\u] ${LIGHT_GRAY}\w${YELLOW} ${LIGHT_GRAY}: "
+    fi
+}
+
+function randomString() {
+  # Note the :- bit in the ${} is a variable assignemt if no length is passed in
+  regex='a-zA-Z0-9'
+  re='^[0-9]+$'
+  if ! [[ $1 =~ $re ]] ; then
+    regex=$regex$1
+  fi
+
+  if ! [[ $2 =~ $re ]] ; then
+    regex=$regex$2
+  fi
+
+  echo "Regex pattern: $regex"
+  cat /dev/urandom | env LC_CTYPE=C tr -dc $regex | fold -w ${1:-32} | head -n 1
+}
+
+# This is what makes the command prompt so pretty
+function gitprompt () {
+  local gitbranch=$(git branch 2>&1 | grep '\*' | sed -e 's/\* //g');
+  # This runs conda env list, searches for the "*", then replaces everything after the first word with ''
+  # if no environment is set, the first word is "base", otherwise it's the name of the virtual environment
+  # If conda is installed, can use this check as well
+  local pythonenv=$(conda env list 2>&1 | grep '*' | sed 's/ .*//');
+  if [[ "$gitbranch" != "" ]]; then
+      PS1="${BLUE}\w${YELLOW} (${gitbranch}) ${WHITE}> "
+      # PS1="${BLUE}\h${WHITE} [\u] ${LIGHT_GRAY}\w${YELLOW} (${gitbranch}) ${LIGHT_GRAY}> "
+    #elif [[ "$pythonenv" != "base" ]]; then
+      #PS1="${BLUE}\w${YELLOW} (${pythonenv}) ${WHITE}> "
+    else
+      PS1="${BLUE}\w${YELLOW} ${WHITE}> "
+      # PS1="${BLUE}\h${WHITE} [\u] ${LIGHT_GRAY}\w${YELLOW} ${LIGHT_GRAY}> "
+  fi
+
+  # Current virtualenv
+  if [[ $VIRTUAL_ENV != "" ]]; then
+      # Strip out the path and just leave the env name
+      #PS1="${BLUE}\w${YELLOW} (${VIRTUAL_ENV}) ${WHITE}> "
+      PS1="${BLUE}\w${LIGHT_BLUE} PYENV: ${VIRTUAL_ENV##*/} ${WHITE}> "
+  fi
+}
+
+PROMPT_COMMAND=gitprompt
+
+SSH_KNOWN_HOSTS=( $(cat ~/.ssh/known_hosts | \
+  cut -f 1 -d ' ' | \
+  sed -e s/,.*//g | \
+  uniq | \
+  egrep -v [0123456789]) )
+# SSH_CONFIG_HOSTS=( $(cat ~/.ssh/config | grep "Host " | grep -v "*" | cut -f 2 -d ' ') )
+
+# complete -o default -W "${SSH_KNOWN_HOSTS[*]} ${SSH_CONFIG_HOSTS[*]}" ssh
+
+WHOAMI=$(whoami)
+
+
+if [ -f `brew --prefix`/etc/bash_completion ]; then
+    . `brew --prefix`/etc/bash_completion
+fi
+
+#export NVM_DIR=~/.nvm
+#source $(brew --prefix nvm)/nvm.sh
+
+# Put this in after running brew update
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && . "/usr/local/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f /Users/wlangley/libs/personal/google/google-cloud-sdk/path.bash.inc ]; then
+  source '/Users/wlangley/libs/personal/google/google-cloud-sdk/path.bash.inc'
+fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f /Users/wlangley/libs/personal/google/google-cloud-sdk/completion.bash.inc ]; then
+  source '/Users/wlangley/libs/personal/google/google-cloud-sdk/completion.bash.inc'
+fi
+
+# Get true colors for gruvbox (Only need if set termcolors isn't defined in vimrc)
+source "$HOME/.vim/plugged/gruvbox/gruvbox_256palette.sh"
+
+
+# Turn off the stupid bell in terminal
+set bell-style none
+
+#---------------------------------------------------
+# Alias Definitions
+#---------------------------------------------------
+alias gf='git-flow'
+alias redis-start='sudo launchctl start io.redis.redis-server'
+alias redis-stop='sudo launchctl stop io.redis.redis-server'
+
+alias notes='cd ~/Google\ Drive/Notes'
+alias h?="history | grep "
+
+# display battery info on your Mac
+# see http://blog.justingreer.com/post/45839440/a-tale-of-two-batteries
+alias battery='ioreg -w0 -l | grep Capacity | cut -d " " -f 17-50'
+
+
+# Need to do this so you use backspace in screen...I have no idea why
+alias screen='TERM=screen screen'
+
+alias g='git '
+alias gs='git status'
+alias gl='git pull'
+alias gp='git push'
+alias gd='git diff'
+alias gdv='git d'
+alias gdh='git diff HEAD'
+alias gc='git commit -v'
+alias gca='git commit -v -a'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gcap='git commit -v -a && git push'
+alias gpp='git pull; git push'
+alias gt='git log --graph --oneline --all'
+
+# For when you are stuck between worlds...
+alias gsd='git svn dcommit'
+alias gsr='git svn rebase'
+
+# general shortcuts
+# alias c='cd '
+alias mv='mv -i'
+alias rm='rm -i'
+
+# Need to do this so you use backspace in screen...I have no idea why
+alias screen='TERM=screen screen'
+
+# listing files
+alias ll='ls -al'
+alias ls='ls -GFh'
+alias ltr='ls -ltr'
+alias lth='ll -t|head'
+alias lh='ls -Shl | less'
+alias tf='tail -f -n 100'
+alias grin="grep -i -r -n"
+alias grine="grep -i -r -n --exclude-dir=node_modules"
+
+# raspberry pi
+alias mypi='ssh pi@192.168.86.92'
+
+# make it where python launches python3
+alias python=python3
+alias jup='jupyter notebook'
+# alias python='/usr/bin/python3'
+
+# Glew stuffs
+alias glew='cd ~/libs/glew'
+alias neutron='cd ~/libs/glew/glew-neutron; nvm use 12'
+alias toolkit='cd ~/libs/glew/glew-toolkit; nvm use 10'
+alias ts='cd ~/libs/glew/glew-toolkit-server; nvm use 10'
+alias warehouse='cd ~/libs/glew/glew-warehouse-models'
+alias data='cd ~/libs/glew/glew-data; nvm use 10'
+alias walrus='cd ~/libs/glew/glew-walrus; nvm use 12'
+alias snapshot='cd ~/libs/glew/glew-tasks-daily-snapshot'
+alias fusion='cd ~/go/src/github.com/glewio/glew-fusion'
+alias defector='cd ~/go/src/github.com/glewio/glew-defector'
+alias adwords='cd ~/go/src/github.com/glewio/glew-adwords-api'
+alias enterprise='cd ~/libs/glew/mantle-enterprise; nvm use 8'
+alias da="direnv allow"
+alias wmip="curl ifconfig.me"
+
+alias makespace="defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'; killall Dock"
+alias pyserv="python -m SimpleHTTPServer 8080"
+alias pyenvlist="pyenv virtualenvs"
+
+# COLOR STRINGS
+        RED="\[\033[0;31m\]"
+     ORANGE="\[\033[0;33m\]"
+     YELLOW="\[\033[0;33m\]"
+      GREEN="\[\033[0;32m\]"
+       BLUE="\[\033[0;34m\]"
+  LIGHT_RED="\[\033[1;31m\]"
+LIGHT_GREEN="\[\033[1;32m\]"
+      WHITE="\[\033[1;37m\]"
+ LIGHT_GRAY="\[\033[0;37m\]"
+ LIGHT_BLUE="\[\033[1;34m\]"
+ COLOR_NONE="\[\e[0m\]"
+
+
+
+#---------------------------------------------------
+# Environment Variables
+#---------------------------------------------------
+
+
+# GoodReads API
+export GOOD_READS_KEY='CEZxPZq9IGkezmK44og3g'
+export GOOD_READS_SECRET='mCfcCzGk81T7P6Uj1zRRinz6mMZlBmBESBqlXMSE'
+
+# Google Bookshelf API
+export GOOGLE_BOOKSHELF_API='AIzaSyD6mwFX7MgHJgKfTkdnUoODvn2qtAfWcPI'
+
+# RateBeer api key
+export RATEBEER_API_KEY='DjZ6hjBPHp51EbDryT5hv84Bu2lQ28baGT2wBZQc'
+
+# This is in bash_profile as well, but it doesn't seem to be working....
+#export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+
+export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+#export PATH="/usr/local/bin:$PATH"
+export NODE_PATH="/usr/local/bin/node:/usr/local/lib/node_modules:{$WHOAMI}/lib/node_modules"
+export NODE_ENV=development
+export PATH="~/Library/Python/3.7/bin:$PATH"
+#export PATH=~/anaconda3/bin:$PATH
+
+# Enable color in grep
+export GREP_OPTIONS='--color=auto'
+export GREP_COLOR='3;33'
+
+export CLICOLOR=1  # same as 'alias ls=ls -G' which I also have set
+# I have no idea what this does...
+export LSCOLORS=GxFxCxDxBxegedabagaced
+
+# Glew Gmail API
+export CLIENT_ID='972607047653-thelc3knav45jhqphjc1h9v1t2ph3l70.apps.googleusercontent.com'
+export CLIENT_SECRET='qHsn9avU9k60xT6eBqtSJRrZ'
+
+# Apache Spark
+export SPARK_HOME=/usr/local/Cellar/apache-spark/2.4.5/libexec
+export PYTHONPATH=/usr/local/Cellar/apache-spark/2.4.5/libexec/python/:$PYTHONP$
+
+export HISTTIMEFORMAT="%d/%m/%y %T "
+
+export QUANDL_API_KEY='gj6rB6st3XxDG9GsNzRS'
+
+# Github Insomnia Token
+# fb6459d65fd7713a2f971b7fdb0a9c815bffa08e
+
+# export PATH=/Users/walkerlangley/Library/Python/3.7/bin/:$PATH
+export PATH="/usr/local/sbin:$PATH"
+
+
+# For glew-university Docker example
+export SQLITE_DB_LOCATION='./src/persistence/todos/todo.db'
+
