@@ -3,6 +3,7 @@
 " ========================================================================================
 
 " Specify a directory for plugins (for Neovim: ~/.local/share/nvim/plugged)
+set nocompatible
 call plug#begin('~/.vim/plugged')
 
 " Make sure you use single quotes
@@ -12,8 +13,12 @@ Plug 'junegunn/vim-easy-align'
 Plug 'crusoexia/vim-javascript-lib'
 
 " Any valid git URL is allowed
+" Color Themes
 Plug 'https://github.com/morhetz/gruvbox'
 Plug 'https://github.com/tomasr/molokai'
+Plug 'https://github.com/joshdick/onedark.vim'
+
+
 Plug 'https://github.com/junegunn/vim-github-dashboard.git'
 Plug 'https://github.com/pangloss/vim-javascript'
 Plug 'https://github.com/jelera/vim-javascript-syntax'
@@ -46,7 +51,7 @@ Plug 'https://github.com/suan/vim-instant-markdown'
 Plug 'https://github.com/w0rp/ale'
 "
 " Multiple Plug commands can be written in a single line using | separators
-Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+"Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 Plug 'hzchirs/vim-material'
 "Plug 'https://github.com/NewProggie/NewProggie-Color-Scheme'
 "Plug 'https://github.com/roosta/vim-srcery'
@@ -119,13 +124,18 @@ set showtabline=2
 syntax enable
 
 " Access colors present in 256 colorspace
-let base16colorspace=256
+" let base16colorspace=256
+" let g:gruvbox_termcolors=16
+let g:gruvbox_italic=0
+syntax on
+"let g:onedark_terminal_italics=0
+"colorscheme onedark
 
 " A whole bunch of different color themes
-colorscheme base16-default-dark
+"colorscheme base16-default-dark
 "colorscheme molokai
 "colorscheme onehalfdark
-"colorscheme gruvbox
+colorscheme gruvbox
 "colorscheme vim-material
 "colorscheme newproggie
 "colorscheme srcery
